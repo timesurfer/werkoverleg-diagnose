@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Werkoverleg Diagnose - Spanningsvelden</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            color: #1a1a2e;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            background: linear-gradient(90deg, #059669, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .version-info {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .meta-inputs {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .meta-inputs input {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            border-radius: 8px;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .meta-inputs input::placeholder {
+            color: #999;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sliders-panel {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid #e5e5e5;
+        }
+
+        .slider-group {
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .slider-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .slider-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #1a1a2e;
+        }
+
+        .slider-poles {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .pole-left { color: #059669; font-weight: 500; }
+        .pole-right { color: #d97706; font-weight: 500; }
+
+        .slider-track {
+            position: relative;
+            height: 40px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            -webkit-appearance: none;
+            background: linear-gradient(90deg, #059669 0%, #9ca3af 50%, #d97706 100%);
+            border-radius: 4px;
+            outline: none;
+            position: absolute;
+            top: 16px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #7c3aed;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .indicator-display {
+            background: #ffffff;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 12px;
+            min-height: 60px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .indicator-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .indicator-text {
+            color: #555;
+        }
+
+        .indicator-text.left { color: #059669; }
+        .indicator-text.right { color: #d97706; }
+
+        .indicator-display.extreme {
+            border: 2px solid;
+        }
+
+        .indicator-display.extreme.left-extreme {
+            border-color: #059669;
+            background: rgba(5, 150, 105, 0.08);
+        }
+
+        .indicator-display.extreme.right-extreme {
+            border-color: #d97706;
+            background: rgba(217, 119, 6, 0.08);
+        }
+
+        .extreme-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .extreme-label.left { color: #059669; }
+        .extreme-label.right { color: #d97706; }
+
+        .pattern-panel {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            border: 1px solid #e5e5e5;
+        }
+
+        .pattern-panel h2 {
+            font-size: 1.2rem;
+            color: #1a1a2e;
+            margin-bottom: 15px;
+        }
+
+        .pattern-visual {
+            margin: 20px 0;
+        }
+
+        .line {
+            display: block;
+            height: 12px;
+            margin: 8px auto;
+            width: 80px;
+            border-radius: 3px;
+            transition: all 0.3s;
+        }
+
+        .line {
+            position: relative;
+        }
+
+        .line-num {
+            position: absolute;
+            left: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.65rem;
+            color: #999;
+        }
+
+        .line.left {
+            background: linear-gradient(90deg, #059669 0%, #059669 40%, transparent 40%, transparent 60%, #059669 60%, #059669 100%);
+        }
+
+        .line.right {
+            background: #d97706;
+        }
+
+        .line.attention {
+            animation: pulse 1.5s infinite;
+            box-shadow: 0 0 8px currentColor;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pattern-summary {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .pattern-summary h3 {
+            font-size: 0.9rem;
+            color: #7c3aed;
+            margin-bottom: 8px;
+        }
+
+        .pattern-number {
+            color: #999;
+            font-weight: normal;
+            margin-right: 4px;
+        }
+
+        .pattern-summary p {
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        .attention-section {
+            background: rgba(124, 58, 237, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .attention-section h4 {
+            color: #7c3aed;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+
+        .attention-item {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+        }
+
+        .attention-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .attention-item strong {
+            color: #7c3aed;
+            font-size: 0.8rem;
+        }
+
+        .attention-item p {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .shadow-warning {
+            color: #dc2626;
+            font-size: 0.75rem;
+            margin-top: 4px;
+        }
+
+        .target-pattern {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px dashed #e5e5e5;
+        }
+
+        .target-pattern h3 {
+            color: #7c3aed;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .target-pattern .pattern-visual .line {
+            height: 8px;
+            width: 50px;
+        }
+
+        .dialogue-section {
+            margin-top: 30px;
+            background: rgba(5, 150, 105, 0.05);
+            border: 1px solid rgba(5, 150, 105, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .dialogue-section h3 {
+            color: #059669;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .dialogue-question {
+            font-style: italic;
+            color: #555;
+            margin-bottom: 10px;
+            padding-left: 15px;
+            border-left: 3px solid #059669;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .action-btn.reset {
+            background: #e5e5e5;
+            color: #333;
+        }
+
+        .action-btn.print {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+        }
+
+        .hidden { display: none !important; }
+
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+            .actions { display: none; }
+            .sliders-panel, .pattern-panel {
+                background: #f5f5f5;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Werkoverleg Diagnose</h1>
+            <p class="subtitle">Systemische analyse van spanningsvelden in tactisch overleg</p>
+            <p class="version-info">Versie 2.1 • In lijn met DSM master</p>
+        </header>
+
+        <div class="meta-inputs">
+            <input type="text" id="circleName" placeholder="Cirkel / Team naam">
+            <input type="date" id="sessionDate">
+        </div>
+
+        <div class="main-content">
+            <div class="sliders-panel" id="slidersPanel">
+                <!-- Sliders worden dynamisch gegenereerd -->
+            </div>
+
+            <div class="pattern-panel">
+                <h2>Huidig Patroon</h2>
+                <div class="pattern-visual" id="patternVisual"></div>
+
+                <div class="pattern-summary" id="patternSummary"></div>
+
+                <div class="attention-section hidden" id="attentionSection">
+                    <h4>⚡ Aandachtspunten</h4>
+                    <div id="attentionContent"></div>
+                </div>
+
+                <div class="target-pattern hidden" id="targetPattern">
+                    <h3>→ Ontwikkeling naar</h3>
+                    <div class="pattern-visual" id="targetPatternVisual"></div>
+                    <div class="pattern-summary" id="targetPatternSummary"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="action-btn reset" onclick="resetAll()">🔄 Reset</button>
+            <button class="action-btn print" onclick="window.print()">🖨️ Print / PDF</button>
+        </div>
+    </div>
+
+<script>
+// ===== SPANNINGSVELDEN DATA v2.0 =====
+const spanningsvelden = {
+    1: {
+        naam: "1. Grond — Vertrouwen ↔ Zekerheid",
+        leftLabel: "Vertrouwen",
+        rightLabel: "Zekerheid",
+        teveelLeft: {
+            label: "Teveel Vertrouwen",
+            statements: [
+                "\"We zien wel waar we uitkomen\"",
+                "Onvoorbereid, vaag, geen richting — alles aan het moment overlaten"
+            ],
+            schaduw: "Ongegrondheid"
+        },
+        left: {
+            statements: [
+                "Ik laat rolhouders zelf hun weg vinden",
+                "Ik breng iets in zonder exact te weten wat ik zoek",
+                "\"Welke rol heb je in gedachten? En het is OK als je het niet weet\"",
+                "Ruimte voor wat zich nog ontvouwt"
+            ]
+        },
+        right: {
+            statements: [
+                "Ik weet bij welke rol ik dit vraag",
+                "Het doel van dit punt is scherp",
+                "Kaders zijn helder — rollen, agenda, volgorde",
+                "\"Aan welke rol vraag je dat?\""
+            ]
+        },
+        teveelRight: {
+            label: "Teveel Zekerheid",
+            statements: [
+                "\"Dat moet eerst langs de Circle Lead\"",
+                "Strikte afstemming vóór elke actie, geen ruimte voor spontane input"
+            ],
+            schaduw: "Rigiditeit"
+        }
+    },
+    2: {
+        naam: "2. Ritme — Zorgvuldigheid ↔ Tempo",
+        leftLabel: "Zorgvuldigheid",
+        rightLabel: "Tempo",
+        teveelLeft: {
+            label: "Teveel Zorgvuldigheid",
+            statements: [
+                "\"Kunnen we hier nog even over doorpraten?\"",
+                "Items worden doorgeschoven voor meer informatie"
+            ],
+            schaduw: "Vertraging"
+        },
+        left: {
+            statements: [
+                "Meerdere perspectieven worden gevraagd per item",
+                "Doorvragen naar achtergrond en context",
+                "\"Helpt dit je?\" / \"Heb je gekregen wat je nodig had?\"",
+                "Sommige items krijgen meer tijd als nodig"
+            ]
+        },
+        right: {
+            statements: [
+                "Alle agendapunten binnen de tijd behandeld",
+                "\"Heeft iemand een item dat we snel kunnen doen?\"",
+                "Items worden snel afgehandeld",
+                "Direct naar \"Wat is de volgende stap?\""
+            ]
+        },
+        teveelRight: {
+            label: "Teveel Tempo",
+            statements: [
+                "\"Volgende! We moeten door\"",
+                "Alles wordt snel doorgejaagd, geen tijd voor verdieping"
+            ],
+            schaduw: "Oppervlakkigheid"
+        }
+    },
+    3: {
+        naam: "3. Sprong — Intern ↔ Extern",
+        leftLabel: "Intern",
+        rightLabel: "Extern",
+        teveelLeft: {
+            label: "Teveel Intern",
+            statements: [
+                "\"Hoe gaat het met het team?\"",
+                "Alleen gesprekken over interne processen en teamdynamiek"
+            ],
+            schaduw: "Navelstaren"
+        },
+        left: {
+            statements: [
+                "Focus op capaciteit en haalbaarheid",
+                "\"Kunnen we dit wel aan?\"",
+                "Teamcapaciteit wordt meegewogen in beslissingen",
+                "\"Wat kunnen wij leveren?\""
+            ]
+        },
+        right: {
+            statements: [
+                "Klantbehoeften komen aan bod",
+                "Commerciële impact wordt meegewogen",
+                "Klantverzoeken en -feedback sturen de agenda",
+                "\"Wat vraagt de klant?\""
+            ]
+        },
+        teveelRight: {
+            label: "Teveel Extern",
+            statements: [
+                "\"De klant wil het morgen\"",
+                "Externe deadlines bepalen alles, geen ruimte voor interne behoefte"
+            ],
+            schaduw: "Reactief"
+        }
+    },
+    4: {
+        naam: "4. Adem — Informeel ↔ Formeel",
+        leftLabel: "Informeel",
+        rightLabel: "Formeel",
+        teveelLeft: {
+            label: "Teveel Informeel",
+            statements: [
+                "\"Oh dat doet me denken aan...\"",
+                "Vrij gesprek zonder vaste volgorde, persoonlijke verhalen tussendoor"
+            ],
+            schaduw: "Chaos"
+        },
+        left: {
+            statements: [
+                "Spontane bijdragen en zijsporen toegestaan",
+                "Structuur met ruimte voor spontaniteit",
+                "Humor en persoonlijke context welkom",
+                "\"Laten we dit even parkeren\""
+            ]
+        },
+        right: {
+            statements: [
+                "Agenda wordt gevolgd met flexibiliteit",
+                "\"Laten we dit vastleggen als next-action\"",
+                "Strakke tijdsbewaking per agendapunt",
+                "Vaste processtappen: Check-in → Triage → Check-out"
+            ]
+        },
+        teveelRight: {
+            label: "Teveel Formeel",
+            statements: [
+                "\"We zijn nu bij stap 4, dus...\"",
+                "Strikte naleving van elk procesdetail, geen afwijking mogelijk"
+            ],
+            schaduw: "Rigiditeit"
+        }
+    },
+    5: {
+        naam: "5. Richting — Afstemming ↔ Eigenaarschap",
+        leftLabel: "Afstemming",
+        rightLabel: "Eigenaarschap",
+        teveelLeft: {
+            label: "Teveel Afstemming",
+            statements: [
+                "\"Wat vinden jullie?\"",
+                "Consensus zoeken bij elk besluit, niemand durft alleen te beslissen"
+            ],
+            schaduw: "Besluiteloosheid"
+        },
+        left: {
+            statements: [
+                "Input wordt gevraagd voordat besluit valt",
+                "Meerdere perspectieven worden gehoord",
+                "\"Naar jouw interpretatie, dient dit je rol?\"",
+                "\"Wat heb JIJ nodig om JOUW besluit te nemen?\""
+            ]
+        },
+        right: {
+            statements: [
+                "\"Je hebt de volledige autoriteit... zolang het geen regel breekt\"",
+                "Rol/persoon neemt het besluit en draagt het",
+                "Vragen worden gericht aan specifieke rollen",
+                "Duidelijke verantwoordelijkheid per agendapunt"
+            ]
+        },
+        teveelRight: {
+            label: "Teveel Eigenaarschap",
+            statements: [
+                "\"Dat is aan de rol, niet aan ons\"",
+                "Alleen de roleigenaar spreekt, anderen zijn passief"
+            ],
+            schaduw: "Passiviteit"
+        }
+    },
+    6: {
+        naam: "6. Stilte — Reflectie ↔ Actie",
+        leftLabel: "Reflectie",
+        rightLabel: "Actie",
+        teveelLeft: {
+            label: "Teveel Reflectie",
+            statements: [
+                "\"Laten we eerst evalueren...\"",
+                "Lange evaluatie van eerdere besluiten, patronen bespreken"
+            ],
+            schaduw: "Stilstand"
+        },
+        left: {
+            statements: [
+                "Tijd voor nadenken en overwegen",
+                "Terugblik op wat wel/niet werkte",
+                "\"Laten we hier even bij stilstaan\"",
+                "\"Is dit eenmalig of doorlopend?\""
+            ]
+        },
+        right: {
+            statements: [
+                "\"Laten we dit vastleggen\" — outputs worden gecaptured",
+                "Kort reflecteren, dan handelen",
+                "Directe focus op acties en next steps",
+                "Veel items afgehandeld"
+            ]
+        },
+        teveelRight: {
+            label: "Teveel Actie",
+            statements: [
+                "\"Actie! Wie doet wat?\"",
+                "Alleen actie, geen tijd voor leren of evalueren"
+            ],
+            schaduw: "Blinde actie"
+        }
+    }
+};
+
+// Patroon interpretaties met hexagram nummers (King Wen volgorde)
+// Business-georiënteerde titels geïnspireerd op Cheng Yi's "The Tao of Organization"
+const patronen = {
+    "111111": { nummer: 1, naam: "Leiderschap & Initiatief",
+        beschrijving: "Pure scheppende kracht. Visie en richting geven.",
+        teamduiding: "Het team is vol daadkracht en initiatief. Er wordt gestuurd en besloten.",
+        advies: "Is er ruimte voor andere stemmen? Wordt er ook geluisterd?",
+        schaduw: "Doordouwen kan leiden tot weerstand of gemiste signalen."
+    },
+    "000000": { nummer: 2, naam: "Uitvoering & Ondersteuning",
+        beschrijving: "Ontvankelijke kracht. Volgen en ondersteunen.",
+        teamduiding: "Het team is receptief en ondersteunend. Er wordt geluisterd en meegebogen.",
+        advies: "Wat zou het team kunnen initiëren? Waar is leiderschap nodig?",
+        schaduw: "Passiviteit kan omslaan in besluiteloosheid."
+    },
+    "100010": { nummer: 3, naam: "Startup-fase",
+        beschrijving: "Beginnersmoeilijkheden. Prille groei onder druk.",
+        teamduiding: "Het team staat aan het begin van een nieuwe fase. Energie én onzekerheid.",
+        advies: "Geduld en helderheid over rollen helpen door de beginfase.",
+        schaduw: "Ongeduld of te snel willen gaan kan de kiem verstoren."
+    },
+    "010001": { nummer: 4, naam: "Onboarding & Leren",
+        beschrijving: "Leren door vallen en opstaan. Begeleiding zoeken.",
+        teamduiding: "Er is veel te leren. Het team zoekt mentorschap en structuur.",
+        advies: "Wie kan als mentor fungeren? Hoe wordt kennis gedeeld?",
+        schaduw: "Te lang in leerstand blijven vermijdt eigen verantwoordelijkheid."
+    },
+    "111010": { nummer: 5, naam: "Strategisch Wachten",
+        beschrijving: "Geduld als strategie. Het juiste moment afwachten.",
+        teamduiding: "Er is daadkracht maar ook terughoudendheid. Timing is essentieel.",
+        advies: "Wat moet er gebeuren voordat de volgende stap gezet kan worden?",
+        schaduw: "Wachten kan ook vermijding zijn."
+    },
+    "010111": { nummer: 6, naam: "Constructief Conflict",
+        beschrijving: "Spanning en verschil van inzicht. Confrontatie.",
+        teamduiding: "Er zijn tegenstrijdige belangen of visies. Spanning zoekt een uitweg.",
+        advies: "Hoe kan het verschil productief worden besproken?",
+        schaduw: "Vermijden van conflict laat het ondergronds woekeren."
+    },
+    "010000": { nummer: 7, naam: "Teamcoördinatie",
+        beschrijving: "Georganiseerde kracht. Discipline en samenwerking.",
+        teamduiding: "Het team opereert gecoördineerd, met duidelijke rollen en richting.",
+        advies: "Is de discipline dienstbaar aan het doel, of een doel op zich?",
+        schaduw: "Te veel discipline kan creativiteit en eigenheid onderdrukken."
+    },
+    "000010": { nummer: 8, naam: "Alliantievorming",
+        beschrijving: "Samenwerking en onderlinge steun. Verbondenheid.",
+        teamduiding: "Het team zoekt verbinding en harmonie. Samenwerken staat centraal.",
+        advies: "Wordt iedereen gehoord? Is er ook ruimte voor verschil?",
+        schaduw: "Harmonie zoeken kan leiden tot vermijden van noodzakelijke confrontatie."
+    },
+    "111011": { nummer: 9, naam: "Incrementele Verbetering",
+        beschrijving: "Kleine stappen. Zachte invloed uitoefenen.",
+        teamduiding: "Er is veel energie, met hier en daar tempering. Vooruitgang in kleine stappen.",
+        advies: "Welke kleine aanpassingen kunnen grote impact hebben?",
+        schaduw: "Te kleine stappen kunnen ongeduld oproepen."
+    },
+    "110111": { nummer: 10, naam: "Bewust Handelen",
+        beschrijving: "Voorzichtig voorwaarts. Bewust van risico's.",
+        teamduiding: "Het team gaat vooruit, maar met aandacht voor de omgeving.",
+        advies: "Waar liggen de risico's? Hoe wordt daarmee omgegaan?",
+        schaduw: "Te veel voorzichtigheid kan verlammen."
+    },
+    "111000": { nummer: 11, naam: "Bloeiende Samenwerking",
+        beschrijving: "Harmonie tussen leiding en uitvoering. Bloei.",
+        teamduiding: "Balans tussen initiatief en ontvankelijkheid. Het team floreert.",
+        advies: "Hoe kan deze balans worden behouden?",
+        schaduw: "Succes kan in zelfgenoegzaamheid omslaan."
+    },
+    "000111": { nummer: 12, naam: "Organisatorische Stagnatie",
+        beschrijving: "Blokkade tussen lagen. Stilstand.",
+        teamduiding: "Er is afstand tussen leiding en uitvoering. Communicatie stokt.",
+        advies: "Waar zit de blokkade? Wat wordt niet uitgesproken?",
+        schaduw: "Stagnatie accepteren als 'normaal' houdt het in stand."
+    },
+    "101111": { nummer: 13, naam: "Teambuilding",
+        beschrijving: "Samenwerking op basis van gedeelde waarden.",
+        teamduiding: "Het team vindt elkaar op gemeenschappelijke grond. Openheid en verbinding.",
+        advies: "Wat zijn de gedeelde waarden? Worden die expliciet gemaakt?",
+        schaduw: "Te veel nadruk op eenheid kan diversiteit onderdrukken."
+    },
+    "111101": { nummer: 14, naam: "Rijke Resources",
+        beschrijving: "Overvloed en verantwoordelijkheid.",
+        teamduiding: "Er is veel capaciteit en mogelijkheid. De vraag is hoe dit te benutten.",
+        advies: "Hoe worden de resources verdeeld en ingezet?",
+        schaduw: "Overvloed kan leiden tot verspilling of zelfgenoegzaamheid."
+    },
+    "001000": { nummer: 15, naam: "Dienend Leiderschap",
+        beschrijving: "Kracht door bescheidenheid. Niet opvallen.",
+        teamduiding: "Het team opereert bescheiden, zonder op de voorgrond te treden.",
+        advies: "Wanneer is het tijd om wél zichtbaar te worden?",
+        schaduw: "Te veel bescheidenheid kan kansen laten liggen."
+    },
+    "000100": { nummer: 16, naam: "Enthousiaste Start",
+        beschrijving: "Inspiratie en beweging. Aanstekelijke energie.",
+        teamduiding: "Er is enthousiasme en beweging vanuit een ontvankelijke basis.",
+        advies: "Waar komt het enthousiasme vandaan? Is het duurzaam?",
+        schaduw: "Enthousiasme zonder grounding kan uitdoven."
+    },
+    "100110": { nummer: 17, naam: "Adaptief Volgen",
+        beschrijving: "Meebewegen met wat zich aandient. Flexibiliteit.",
+        teamduiding: "Het team past zich aan aan de omstandigheden.",
+        advies: "Wat wordt er gevolgd? Is dat bewust gekozen?",
+        schaduw: "Te veel volgen kan leiden tot gebrek aan eigen richting."
+    },
+    "011001": { nummer: 18, naam: "Organisatie-herstel",
+        beschrijving: "Opruimen wat is vastgelopen. Herstelwerk.",
+        teamduiding: "Er is werk aan de winkel. Oude patronen vragen om aandacht.",
+        advies: "Wat moet worden opgeruimd of hersteld?",
+        schaduw: "Alleen repareren zonder de oorzaak aan te pakken."
+    },
+    "110000": { nummer: 19, naam: "Naderende Verandering",
+        beschrijving: "Toenemende invloed. Groei van buiten.",
+        teamduiding: "Er komt iets op het team af. Groei of verandering nadert.",
+        advies: "Hoe bereidt het team zich voor op wat komt?",
+        schaduw: "Reactief blijven terwijl actie nodig is."
+    },
+    "000011": { nummer: 20, naam: "Strategische Observatie",
+        beschrijving: "Observeren en waarnemen. Overzicht krijgen.",
+        teamduiding: "Het team neemt afstand en observeert. Reflectie staat centraal.",
+        advies: "Wat wordt er gezien? Wat blijft verborgen?",
+        schaduw: "Te lang beschouwen kan actie uitstellen."
+    },
+    "100101": { nummer: 21, naam: "Doorpakken",
+        beschrijving: "Obstakels overwinnen. Doorzetten.",
+        teamduiding: "Er is iets dat doorbroken moet worden. Vastberadenheid is nodig.",
+        advies: "Wat staat er in de weg? Hoe kan dat worden aangepakt?",
+        schaduw: "Doorpakken zonder gevoel kan bot overkomen."
+    },
+    "101001": { nummer: 22, naam: "Professionele Presentatie",
+        beschrijving: "Vorm en presentatie. De buitenkant verzorgen.",
+        teamduiding: "Aandacht voor hoe dingen worden gepresenteerd en vormgegeven.",
+        advies: "Is de vorm dienstbaar aan de inhoud?",
+        schaduw: "Te veel focus op vorm kan ten koste gaan van substantie."
+    },
+    "000001": { nummer: 23, naam: "Organisatie-erosie",
+        beschrijving: "Afbraak en verval. Loslaten wat niet meer werkt.",
+        teamduiding: "Oude structuren brokkelen af. Ruimte voor vernieuwing ontstaat.",
+        advies: "Wat mag losgelaten worden?",
+        schaduw: "Afbraak zonder visie op opbouw is destructief."
+    },
+    "100000": { nummer: 24, naam: "Herstel & Terugkeer",
+        beschrijving: "Nieuw begin. Terugkeer naar de kern.",
+        teamduiding: "Een frisse start vanuit een receptieve basis. Hernieuwde energie.",
+        advies: "Wat keert terug? Wat is de kern om bij terug te komen?",
+        schaduw: "Terugkeer kan ook herhaling van oude fouten zijn."
+    },
+    "100111": { nummer: 25, naam: "Authentiek Handelen",
+        beschrijving: "Handelen zonder bijbedoelingen. Puur en direct.",
+        teamduiding: "Het team handelt authentiek, zonder verborgen agenda's.",
+        advies: "Wat zou er veranderen als alle agenda's open op tafel lagen?",
+        schaduw: "Naïviteit kan kwetsbaar maken."
+    },
+    "111001": { nummer: 26, naam: "Capaciteit Opbouwen",
+        beschrijving: "Reserves bundelen. Kracht vasthouden.",
+        teamduiding: "Het team bouwt capaciteit en resources op voor het juiste moment.",
+        advies: "Wanneer is het tijd om los te laten?",
+        schaduw: "Te lang vasthouden kan verstikken."
+    },
+    "100001": { nummer: 27, naam: "Teamvoeding",
+        beschrijving: "Wat voedt en wat uitput. Zorg voor bronnen.",
+        teamduiding: "Aandacht voor wat het team voedt en draagt.",
+        advies: "Wat geeft energie? Wat kost energie?",
+        schaduw: "Alleen nemen zonder geven put uit."
+    },
+    "011110": { nummer: 28, naam: "Kritieke Overbelasting",
+        beschrijving: "Te veel van het goede. Overbelasting.",
+        teamduiding: "Er is een disbalans. Iets is uit verhouding gegroeid.",
+        advies: "Wat is er te veel? Wat vraagt om bijsturing?",
+        schaduw: "Negeren van overmaat leidt tot instorting."
+    },
+    "010010": { nummer: 29, naam: "Uitdagende Omstandigheden",
+        beschrijving: "Diepte en risico. Door de moeilijkheid heen.",
+        teamduiding: "Het team zit in uitdagend vaarwater. Alertheid is geboden.",
+        advies: "Hoe navigeert het team door deze fase?",
+        schaduw: "Angst voor diepte kan leiden tot oppervlakkigheid."
+    },
+    "101101": { nummer: 30, naam: "Zichtbaarheid & Helderheid",
+        beschrijving: "Zichtbaar zijn. Schitteren.",
+        teamduiding: "Het team is zichtbaar en helder. Er is veel energie en uitstraling.",
+        advies: "Wat maakt het team zichtbaar? Is dat wat het wil laten zien?",
+        schaduw: "Schitteren brandt ook uit."
+    },
+    "001110": { nummer: 31, naam: "Wederzijdse Invloed",
+        beschrijving: "Aantrekking en resonantie.",
+        teamduiding: "Er is een natuurlijke aantrekking en samenwerking. Dingen klikken.",
+        advies: "Wat trekt aan? Wat stoot af?",
+        schaduw: "Alleen op feeling afgaan mist soms belangrijke signalen."
+    },
+    "011100": { nummer: 32, naam: "Duurzame Organisatie",
+        beschrijving: "Volhouden en continuïteit. Lange adem.",
+        teamduiding: "Het team houdt vol en bouwt aan iets duurzaams.",
+        advies: "Wat maakt dit duurzaam? Wat bedreigt de continuïteit?",
+        schaduw: "Vasthouden aan wat niet meer werkt."
+    },
+    "001111": { nummer: 33, naam: "Strategische Terugtrekking",
+        beschrijving: "Strategisch terugtreden. Ruimte scheppen.",
+        teamduiding: "Het team trekt zich terug, bewust of onbewust.",
+        advies: "Is terugtrekking strategisch of vermijdend?",
+        schaduw: "Terugtrekking als vlucht."
+    },
+    "111100": { nummer: 34, naam: "Grote Daadkracht",
+        beschrijving: "Overvloedige energie. Doorpakken.",
+        teamduiding: "Het team bruist van de energie en daadkracht.",
+        advies: "Hoe wordt de kracht gericht? Is er ook ruimte voor rust?",
+        schaduw: "Kracht zonder richting kan vernietigen."
+    },
+    "000101": { nummer: 35, naam: "Snelle Vooruitgang",
+        beschrijving: "Stijgen en groeien. Natuurlijke ontwikkeling.",
+        teamduiding: "Het team maakt voortgang vanuit een stabiele basis.",
+        advies: "Wat draagt de groei? Wat kan deze ondersteunen?",
+        schaduw: "Vooruitgang kan blinde vlekken creëren."
+    },
+    "101000": { nummer: 36, naam: "Talent in Moeilijke Tijden",
+        beschrijving: "Moeilijke tijden. Het licht bewaren.",
+        teamduiding: "Er is uitdaging of tegenslag. Doorzettingsvermogen is nodig.",
+        advies: "Hoe blijft het team bij zijn kern in moeilijke tijden?",
+        schaduw: "Opgeven terwijl volhouden gevraagd wordt."
+    },
+    "101011": { nummer: 37, naam: "Interne Organisatie",
+        beschrijving: "Innerlijke orde. Harmonie in het team.",
+        teamduiding: "Het team functioneert als een hecht geheel met duidelijke verhoudingen.",
+        advies: "Hoe zijn de onderlinge verhoudingen? Is iedereen op zijn plek?",
+        schaduw: "Te gesloten systeem sluit buitenwereld uit."
+    },
+    "110101": { nummer: 38, naam: "Diverse Perspectieven",
+        beschrijving: "Verschil en spanning. Tegenovergestelde krachten.",
+        teamduiding: "Er zijn tegengestelde belangen of perspectieven in het team.",
+        advies: "Hoe kan het verschil productief worden?",
+        schaduw: "Polarisatie zonder verbinding leidt tot breuk."
+    },
+    "001010": { nummer: 39, naam: "Obstakel-navigatie",
+        beschrijving: "Hindernis op de weg. Vertragen en omdenken.",
+        teamduiding: "Het team loopt ergens tegenaan. Andere aanpak is nodig.",
+        advies: "Wat is het obstakel? Wat vraagt het?",
+        schaduw: "Obstakel zien als definitief in plaats van als informatie."
+    },
+    "010100": { nummer: 40, naam: "Oplossing & Bevrijding",
+        beschrijving: "Opluchting en oplossing. Knoop doorhakken.",
+        teamduiding: "Er komt ruimte na een periode van spanning of blokkade.",
+        advies: "Wat is er opgelost? Wat vraagt nog aandacht?",
+        schaduw: "Te snel door naar het volgende zonder integratie."
+    },
+    "110001": { nummer: 41, naam: "Lean Werken",
+        beschrijving: "Minder is meer. Bewust reduceren.",
+        teamduiding: "Het team laat dingen los om ruimte te maken.",
+        advies: "Wat kan weg? Wat moet behouden blijven?",
+        schaduw: "Te veel weghalen ondermijnt de basis."
+    },
+    "100011": { nummer: 42, naam: "Groei & Investering",
+        beschrijving: "Groei en toename. Investeren.",
+        teamduiding: "Het team groeit en breidt uit.",
+        advies: "Wat groeit er? Is de groei duurzaam?",
+        schaduw: "Groeien om het groeien kan uit de hand lopen."
+    },
+    "111110": { nummer: 43, naam: "Beslissende Doorbraak",
+        beschrijving: "Resoluut handelen. Knopen doorhakken.",
+        teamduiding: "Het team staat voor een beslissend moment. Doorpakken is nodig.",
+        advies: "Wat moet er besloten worden? Wie neemt de leiding?",
+        schaduw: "Doordouwen zonder draagvlak creëert weerstand."
+    },
+    "011111": { nummer: 44, naam: "Onverwachte Kansen",
+        beschrijving: "Het onverwachte. Iets nieuws dient zich aan.",
+        teamduiding: "Er komt iets of iemand nieuws op het team af.",
+        advies: "Hoe wordt het nieuwe ontvangen?",
+        schaduw: "Overvallen worden door het onverwachte."
+    },
+    "000110": { nummer: 45, naam: "Teamverzameling",
+        beschrijving: "Bijeenkomen. Bundeling van krachten.",
+        teamduiding: "Het team komt samen en bundelt krachten.",
+        advies: "Waarvoor komt men samen? Is het doel helder?",
+        schaduw: "Verzamelen zonder richting leidt tot chaos."
+    },
+    "011000": { nummer: 46, naam: "Organische Groei",
+        beschrijving: "Geleidelijke groei. Stap voor stap omhoog.",
+        teamduiding: "Het team ontwikkelt zich gestaag vanuit een ontvankelijke basis.",
+        advies: "Wat is de volgende stap? Hoe wordt groei ondersteund?",
+        schaduw: "Ongeduld met het tempo van groei."
+    },
+    "010110": { nummer: 47, naam: "Resource-schaarste",
+        beschrijving: "Klem zitten. Beperking ervaren.",
+        teamduiding: "Het team voelt zich beperkt of in het nauw gedreven.",
+        advies: "Waar zit de beperking? Wat kan er wél?",
+        schaduw: "Opgeven in plaats van een andere weg zoeken."
+    },
+    "011010": { nummer: 48, naam: "Kennisbron",
+        beschrijving: "Terugkeren naar de bron. Fundamenten checken.",
+        teamduiding: "Het team zoekt naar de kern, de basiswaarden.",
+        advies: "Wat is de bron van dit team? Wat voedt het?",
+        schaduw: "De bron vervuilen of vergeten."
+    },
+    "101110": { nummer: 49, naam: "Organisatie-transformatie",
+        beschrijving: "Fundamentele verandering. Revolutie.",
+        teamduiding: "Er is een grote verandering gaande of nodig.",
+        advies: "Wat verandert er fundamenteel? Is het team er klaar voor?",
+        schaduw: "Verandering om de verandering."
+    },
+    "011101": { nummer: 50, naam: "Innovatie & Creatie",
+        beschrijving: "Iets nieuws creëren vanuit bestaande ingrediënten.",
+        teamduiding: "Het team is bezig iets nieuws te creëren.",
+        advies: "Wat wordt er gecreëerd? Welke ingrediënten zijn nodig?",
+        schaduw: "Te veel tegelijk willen transformeren."
+    },
+    "100100": { nummer: 51, naam: "Urgente Impuls",
+        beschrijving: "Schok en opschudding. Wakker geschud worden.",
+        teamduiding: "Er is iets dat het team wakker schudt. Een schokeffect.",
+        advies: "Wat is de schok? Wat maakt het duidelijk?",
+        schaduw: "Geschokt blijven in plaats van integreren."
+    },
+    "001001": { nummer: 52, naam: "Bewuste Pauze",
+        beschrijving: "Rust en bezinning. Even stoppen.",
+        teamduiding: "Het team staat stil. Tijd voor reflectie.",
+        advies: "Wat vraagt de stilstand? Wat wordt er gezien?",
+        schaduw: "Stilstand als vermijding van actie."
+    },
+    "001011": { nummer: 53, naam: "Geleidelijke Ontwikkeling",
+        beschrijving: "Stap voor stap. Geduldig voortgaan.",
+        teamduiding: "Het team ontwikkelt zich geleidelijk, zonder haast.",
+        advies: "Is het tempo passend? Wat vraagt geduld?",
+        schaduw: "Te langzaam gaan kan momentum verliezen."
+    },
+    "110100": { nummer: 54, naam: "Nieuwe Teamleden",
+        beschrijving: "Aanpassing en integratie. Een nieuwe rol innemen.",
+        teamduiding: "Er is iets of iemand nieuw dat geïntegreerd moet worden.",
+        advies: "Hoe wordt het nieuwe verwelkomd? Wat moet aangepast?",
+        schaduw: "Assimilatie die eigenheid uitwist."
+    },
+    "101100": { nummer: 55, naam: "Piek-performance",
+        beschrijving: "Hoogtepunt. Volheid en rijkdom.",
+        teamduiding: "Het team zit op een hoogtepunt. Er is veel.",
+        advies: "Hoe om te gaan met het hoogtepunt? Wat komt erna?",
+        schaduw: "Denken dat het hoogtepunt blijft duren."
+    },
+    "001101": { nummer: 56, naam: "Tijdelijk Project",
+        beschrijving: "Onderweg zijn. Tijdelijkheid en flexibiliteit.",
+        teamduiding: "Het team is in transitie. Niet alles is vast.",
+        advies: "Wat is de bestemming? Wat wordt onderweg geleerd?",
+        schaduw: "Altijd onderweg, nooit aankomen."
+    },
+    "011011": { nummer: 57, naam: "Subtiele Invloed",
+        beschrijving: "Zachte persistentie. Geleidelijk invloed uitoefenen.",
+        teamduiding: "Het team werkt met zachte kracht. Geleidelijke invloed.",
+        advies: "Waar is zachtheid effectiever dan kracht?",
+        schaduw: "Te zacht zijn kan invloed verliezen."
+    },
+    "110110": { nummer: 58, naam: "Positieve Teamsfeer",
+        beschrijving: "Vreugde en openheid. Delen en uitwisselen.",
+        teamduiding: "Er is blijheid en openheid in het team. Goede sfeer.",
+        advies: "Wat voedt de vreugde? Hoe wordt deze behouden?",
+        schaduw: "Oppervlakkige blijheid die echte issues vermijdt."
+    },
+    "010011": { nummer: 59, naam: "Ontschotting",
+        beschrijving: "Verspreiden en loslaten. Grenzen laten vervagen.",
+        teamduiding: "Structuren worden losser. Silo's worden doorbroken.",
+        advies: "Wat lost er op? Is dat de bedoeling?",
+        schaduw: "Te veel oplossen leidt tot verlies van samenhang."
+    },
+    "110010": { nummer: 60, naam: "Kaders & Grenzen",
+        beschrijving: "Grenzen stellen. Begrenzing als kracht.",
+        teamduiding: "Het team werkt binnen duidelijke grenzen en kaders.",
+        advies: "Zijn de grenzen helpend of beperkend?",
+        schaduw: "Te strikte grenzen verstikken."
+    },
+    "110011": { nummer: 61, naam: "Vertrouwen & Integriteit",
+        beschrijving: "Authenticiteit en vertrouwen. Vanuit de kern.",
+        teamduiding: "Het team opereert vanuit waarachtigheid en vertrouwen.",
+        advies: "Wat is de innerlijke waarheid? Wordt die uitgesproken?",
+        schaduw: "Waarheid claimen zonder te luisteren."
+    },
+    "001100": { nummer: 62, naam: "Kleine Verbeteringen",
+        beschrijving: "Fijntunen. Niet te ver gaan.",
+        teamduiding: "Het team maakt kleine bijstellingen.",
+        advies: "Welke kleine aanpassing kan groot verschil maken?",
+        schaduw: "Alleen kleine stappen terwijl grote nodig zijn."
+    },
+    "101010": { nummer: 63, naam: "Project Afgerond",
+        beschrijving: "Voltooid. Evenwicht bereikt.",
+        teamduiding: "Er is iets afgerond. Balans is bereikt.",
+        advies: "Wat is voltooid? Wat is de volgende cyclus?",
+        schaduw: "Denken dat voltooiing het einde is."
+    },
+    "010101": { nummer: 64, naam: "Bijna Klaar",
+        beschrijving: "Nog niet af. Op weg naar voltooiing.",
+        teamduiding: "Het team is onderweg maar nog niet gearriveerd.",
+        advies: "Wat ontbreekt er nog? Wat is de volgende stap?",
+        schaduw: "Ongeduldig zijn met het proces."
+    }
+};
+
+let sliderValues = [50, 50, 50, 50, 50, 50];
+
+// Set initial date
+document.getElementById('sessionDate').valueAsDate = new Date();
+
+// Dynamisch sliders genereren
+function generateSliders() {
+    const panel = document.getElementById('slidersPanel');
+    let html = '';
+
+    // Render from line 6 (top) to line 1 (bottom) to match hexagram order
+    for (let i = 6; i >= 1; i--) {
+        const sv = spanningsvelden[i];
+        html += `
+        <div class="slider-group" data-line="${i}">
+            <div class="slider-header">
+                <span class="slider-title">${i}. ${sv.naam}</span>
+            </div>
+            <div class="slider-poles">
+                <span class="pole-left">← ${sv.leftLabel}</span>
+                <span class="pole-right">${sv.rightLabel} →</span>
+            </div>
+            <div class="slider-track">
+                <input type="range" min="0" max="100" value="50" data-line="${i}">
+            </div>
+            <div class="indicator-display">
+                <div class="indicator-label">Observeerbaar gedrag</div>
+                <div class="indicator-text" id="indicator-${i}"></div>
+            </div>
+        </div>
+        `;
+    }
+
+    html += `
+        <div class="dialogue-section">
+            <h3>💬 Dialoogvragen</h3>
+            <div id="dialogueQuestions"></div>
+        </div>
+    `;
+
+    panel.innerHTML = html;
+
+    // Event listeners
+    document.querySelectorAll('input[type="range"]').forEach(slider => {
+        slider.addEventListener('input', (e) => {
+            const line = parseInt(e.target.dataset.line);
+            sliderValues[line - 1] = parseInt(e.target.value);
+            updateAll();
+        });
+    });
+}
+
+// 4-zone model: Teveel Links (0-19) | Links (20-49) | Rechts (50-80) | Teveel Rechts (81-100)
+function getIndicatorText(line, value) {
+    const sv = spanningsvelden[line];
+    let text, cssClass, isExtreme = false, extremeData = null;
+
+    if (value < 20) {
+        const statements = sv.teveelLeft?.statements || [];
+        const index = Math.min(Math.floor(value / 10), Math.max(0, statements.length - 1));
+        text = statements[index] || statements[0] || '';
+        cssClass = 'left';
+        isExtreme = true;
+        extremeData = sv.teveelLeft;
+    } else if (value < 50) {
+        const statements = sv.left?.statements || [];
+        const index = Math.min(Math.floor((value - 20) / 8), Math.max(0, statements.length - 1));
+        text = statements[index] || statements[0] || '';
+        cssClass = 'left';
+    } else if (value <= 80) {
+        const statements = sv.right?.statements || [];
+        const index = Math.min(Math.floor((value - 50) / 8), Math.max(0, statements.length - 1));
+        text = statements[index] || statements[0] || '';
+        cssClass = 'right';
+    } else {
+        const statements = sv.teveelRight?.statements || [];
+        const index = Math.min(Math.floor((value - 81) / 10), Math.max(0, statements.length - 1));
+        text = statements[index] || statements[0] || '';
+        cssClass = 'right';
+        isExtreme = true;
+        extremeData = sv.teveelRight;
+    }
+
+    return { text, cssClass, isExtreme, extremeData };
+}
+
+function updateIndicator(line) {
+    const value = sliderValues[line - 1];
+    const { text, cssClass, isExtreme, extremeData } = getIndicatorText(line, value);
+    const sv = spanningsvelden[line];
+
+    const indicatorEl = document.getElementById(`indicator-${line}`);
+    const displayEl = indicatorEl.parentElement;
+
+    displayEl.classList.remove('extreme', 'left-extreme', 'right-extreme');
+
+    let html = '';
+    if (isExtreme && extremeData) {
+        const extremeType = value < 20 ? 'left' : 'right';
+        html = `<div class="extreme-label ${extremeType}">⚡ ${extremeData.label.toUpperCase()}</div>`;
+        displayEl.classList.add('extreme', `${extremeType}-extreme`);
+    }
+    html += text;
+
+    indicatorEl.innerHTML = html;
+    indicatorEl.className = `indicator-text ${cssClass}`;
+}
+
+function valueToSide(value) {
+    return value >= 50 ? 1 : 0; // 0 = left, 1 = right
+}
+
+function isAttentionLine(value) {
+    return value < 20 || value > 80;
+}
+
+function updatePattern() {
+    const visualEl = document.getElementById('patternVisual');
+    const attentionSection = document.getElementById('attentionSection');
+    const attentionContent = document.getElementById('attentionContent');
+    const targetPattern = document.getElementById('targetPattern');
+
+    let binary = '';
+    let linesHtml = '';
+    let attentionLines = [];
+    let targetBinary = '';
+
+    // Build pattern from bottom (line 1) to top (line 6)
+    for (let i = 5; i >= 0; i--) {
+        const value = sliderValues[i];
+        const isRight = valueToSide(value);
+        const isAttention = isAttentionLine(value);
+        binary = (isRight ? '1' : '0') + binary;
+
+        // Target pattern: flip attention lines
+        const targetIsRight = isAttention ? (1 - isRight) : isRight;
+        targetBinary = (targetIsRight ? '1' : '0') + targetBinary;
+
+        const lineClass = isRight ? 'right' : 'left';
+        const attentionClass = isAttention ? 'attention' : '';
+        const lineNumber = i + 1;
+        linesHtml += `<div class="line ${lineClass} ${attentionClass}" data-line="${lineNumber}"><span class="line-num">${lineNumber}</span></div>`;
+
+        if (isAttention) {
+            const sv = spanningsvelden[i + 1];
+            const extremeData = value < 20 ? sv.teveelLeft : sv.teveelRight;
+            attentionLines.push({
+                line: i + 1,
+                label: extremeData?.label || (value < 20 ? `Teveel ${sv.leftLabel}` : `Teveel ${sv.rightLabel}`),
+                schaduw: extremeData?.schaduw || '',
+                statement: extremeData?.statements?.[0] || ''
+            });
+        }
+    }
+
+    visualEl.innerHTML = linesHtml;
+
+    // Pattern interpretation
+    const summaryEl = document.getElementById('patternSummary');
+    const patroon = patronen[binary];
+
+    if (patroon) {
+        let summaryHtml = `
+            <h3><span class="pattern-number">${patroon.nummer}.</span> ${patroon.naam}</h3>
+            <p><strong>${patroon.beschrijving}</strong></p>
+            <p>${patroon.teamduiding}</p>
+            <h3>Reflectievraag</h3>
+            <p>${patroon.advies}</p>
+            <h3>Schaduw</h3>
+            <p>${patroon.schaduw}</p>
+        `;
+        summaryEl.innerHTML = summaryHtml;
+    } else {
+        // Fallback als patroon niet in database staat
+        const leftCount = sliderValues.filter(v => v < 50).length;
+        const rightCount = 6 - leftCount;
+        summaryEl.innerHTML = `
+            <h3>Patroon</h3>
+            <p>${leftCount} van 6 spanningsvelden neigen naar de linkerpool, ${rightCount} naar de rechterpool.</p>
+        `;
+    }
+
+    // Attention lines
+    if (attentionLines.length > 0) {
+        attentionSection.classList.remove('hidden');
+        attentionContent.innerHTML = attentionLines.map(al => `
+            <div class="attention-item">
+                <strong>${al.label}</strong>
+                ${al.statement ? `<p>${al.statement}</p>` : ''}
+                ${al.schaduw ? `<p class="shadow-warning">⚠️ Schaduw: ${al.schaduw}</p>` : ''}
+            </div>
+        `).join('');
+
+        // Show target pattern (what happens when attention lines flip)
+        if (binary !== targetBinary) {
+            targetPattern.classList.remove('hidden');
+            const targetVisualEl = document.getElementById('targetPatternVisual');
+            let targetHtml = '';
+            for (let i = 5; i >= 0; i--) {
+                const isRight = targetBinary[5 - i] === '1';
+                const lineNumber = i + 1;
+                targetHtml += `<div class="line ${isRight ? 'right' : 'left'}" data-line="${lineNumber}"><span class="line-num">${lineNumber}</span></div>`;
+            }
+            targetVisualEl.innerHTML = targetHtml;
+
+            // Target pattern interpretation
+            const targetSummaryEl = document.getElementById('targetPatternSummary');
+            const targetPatroon = patronen[targetBinary];
+            if (targetPatroon) {
+                targetSummaryEl.innerHTML = `
+                    <h4><span class="pattern-number">${targetPatroon.nummer}.</span> ${targetPatroon.naam}</h4>
+                    <p>${targetPatroon.beschrijving}</p>
+                    <p><em>${targetPatroon.teamduiding}</em></p>
+                `;
+            } else {
+                const targetLeftCount = targetBinary.split('').filter(b => b === '0').length;
+                targetSummaryEl.innerHTML = `<p>Verschuift naar ${targetLeftCount} links, ${6 - targetLeftCount} rechts.</p>`;
+            }
+        }
+    } else {
+        attentionSection.classList.add('hidden');
+        targetPattern.classList.add('hidden');
+    }
+}
+
+function updateDialogue() {
+    const questions = [];
+
+    sliderValues.forEach((val, i) => {
+        if (val < 20 || val > 80) {
+            const sv = spanningsvelden[i + 1];
+            const poleName = val < 20 ? sv.leftLabel : sv.rightLabel;
+            questions.push(`Bij <strong>${sv.naam}</strong> zie je veel ${poleName}-energie. Wat is het effect daarvan?`);
+        }
+    });
+
+    if (questions.length === 0) {
+        questions.push('De dynamiek tussen de polen lijkt in balans. Waar voelt het team de meeste spanning?');
+    }
+
+    questions.push('Wat valt op in dit beeld van jullie werkoverleg?');
+    questions.push('Wat zou één kleine verschuiving kunnen zijn voor de volgende keer?');
+
+    document.getElementById('dialogueQuestions').innerHTML =
+        questions.map(q => `<p class="dialogue-question">${q}</p>`).join('');
+}
+
+function updateAll() {
+    for (let i = 1; i <= 6; i++) {
+        updateIndicator(i);
+    }
+    updatePattern();
+    updateDialogue();
+}
+
+function resetAll() {
+    sliderValues = [50, 50, 50, 50, 50, 50];
+    document.querySelectorAll('input[type="range"]').forEach(s => s.value = 50);
+    updateAll();
+}
+
+// Initialize
+generateSliders();
+updateAll();
+</script>
+</body>
+</html>
